@@ -34,7 +34,7 @@
 
 void swap(double& a, double& b) {
 	/* CSE 386 - todo  */
-	double& temp = b;
+	double temp = b;
 	b = a;
 	a = temp;
 }
@@ -53,7 +53,7 @@ void swap(double& a, double& b) {
 
 bool approximatelyEqual(double a, double b) {
 	/* CSE 386 - todo  */
-	return (a-b) > -EPSILON || (a-b) < EPSILON;
+	return (a - b) >= -(EPSILON) && (a - b) <= EPSILON;
 }
 
 /**
@@ -163,7 +163,7 @@ double min(double A, double B, double C) {
 
 double max(double A, double B, double C) {
 	/* CSE 386 - todo  */
-	return glm::max(A, glm::min(B,C));
+	return glm::max(A, glm::max(B,C));
 }
 
 /**
