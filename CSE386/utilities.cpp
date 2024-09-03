@@ -19,6 +19,7 @@
 #include "utilities.h"
 #include "ishape.h"
 
+
 /*
  * NOTE: There are several dozen functions in this file that you will implement over the course of the semester.
  * Implement only the ones listed for the given assignment (read the handout); you needn't do all of them in one sitting.
@@ -258,8 +259,8 @@ double areaOfTriangle(double x1, double y1, double x2, double y2, double x3, dou
  */
 
 void pointOnUnitCircle(double angleRads, double& x, double& y) {
-	/* CSE 386 - todo  */
-	x = y = 0;
+	x = glm::cos(angleRads);
+	y = glm:sin(angleRads);
 }
 
 /**
@@ -273,8 +274,9 @@ void pointOnUnitCircle(double angleRads, double& x, double& y) {
 */
 
 dvec2 pointOnCircle(const dvec2& center, double R, double angleRads) {
-	/* CSE 386 - todo  */
-	return dvec2(0, 0);;
+	double x = center[0] + (R * glm::cos(angleRads));
+	double y = center[1] + (R * glm::sin(angleRads));
+	return dvec2(x, y);
 }
 
 /**
@@ -293,8 +295,9 @@ dvec2 pointOnCircle(const dvec2& center, double R, double angleRads) {
 */
 
 double directionInRadians(const dvec2& referencePt, const dvec2& targetPt) {
-	/* CSE 386 - todo  */
-	return 0;
+	double diffX = (targetPt[0] - referencePt[0]);
+	double diffY = (targetPt[1] - referencePt[1]); 
+	return std::atan2(diffY,diffX);
 }
 
 /**
@@ -308,8 +311,8 @@ double directionInRadians(const dvec2& referencePt, const dvec2& targetPt) {
 */
 
 double directionInRadians(const dvec2& targetPt) {
-	/* CSE 386 - todo  */
-	return 0;
+	double res = std::atan2(targetPt[1], targetPt[0]);
+	return normalizeRadians(res);
 }
 
 /**
@@ -327,8 +330,9 @@ double directionInRadians(const dvec2& targetPt) {
 */
 
 double directionInRadians(double x1, double y1, double x2,  double y2) {
-	/* CSE 386 - todo  */
-	return 0.0;
+	double diffX = (x2 - x1);
+	double diffY = (y2 - y1); 
+	return std::atan2(diffY,diffX);
 }
 
 /**
