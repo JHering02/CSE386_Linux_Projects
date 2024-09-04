@@ -259,8 +259,11 @@ double areaOfTriangle(double x1, double y1, double x2, double y2, double x3, dou
  */
 
 void pointOnUnitCircle(double angleRads, double& x, double& y) {
-	x = glm::cos(angleRads);
-	y = glm:sin(angleRads);
+	x = glm::round(glm::cos(angleRads));
+	y = glm::round(glm::sin(angleRads));
+	if (x == -0 || y == -0) {
+		x == -0 ? x = 0 : y = 0;
+	}
 }
 
 /**
@@ -274,8 +277,11 @@ void pointOnUnitCircle(double angleRads, double& x, double& y) {
 */
 
 dvec2 pointOnCircle(const dvec2& center, double R, double angleRads) {
-	double x = center[0] + (R * glm::cos(angleRads));
-	double y = center[1] + (R * glm::sin(angleRads));
+	double x = glm::round(center.x + (R * glm::cos(angleRads)));
+	double y = glm::round(center.x + (R * glm::sin(angleRads)));
+	if (x == -0 || y == -0) {
+		x == -0 ? x = 0 : y = 0;
+	}
 	return dvec2(x, y);
 }
 
