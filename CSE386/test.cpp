@@ -122,3 +122,57 @@
 //     std::cout << "From: (2, 2), To: (2, 0) -> Angle (radians): " << result
 //               << " (Expected: 4.7123889804)" << std::endl;
 // }
+
+// Coding Exercise 3 Test
+
+int main(int argc, char *argv[]) {
+
+    std::vector<double> result;
+
+    result = quadratic(1,4,3);
+    std::cout << "{";
+	 for (auto res : result) {
+         std::cout << res << ",";
+    }
+    std::cout << "}" << std::endl;
+
+    result = quadratic(1,0,0);
+    std::cout << "{";
+	 for (auto res : result) {
+         std::cout << res << ",";
+    }
+    std::cout << "}" << std::endl;
+
+    result = quadratic(-4,-2,-1);
+    std::cout << "{";
+	 for (auto res : result) {
+         std::cout << res << ",";
+    }
+    std::cout << "}" << std::endl;
+
+    // Roots with array
+
+    double roots[2];
+    int numRoots = quadratic(-4, -2, -1, roots);
+    if (numRoots == 0)
+    {
+        std::cout << "There are no real roots" << endl;
+    }
+    else if (numRoots == 1)
+    {
+        std::cout << "Only one root: " << roots[0] << endl;
+    }
+    else if (numRoots == 2)
+    {
+        if (roots[0] > roots[1])
+            std::cout << "Something is wrong. This should not happen" << endl;
+        else
+            std::cout << "Two roots: " << roots[0] << " and " << roots[1] << endl;
+    }
+    else
+    {
+        std::cout << "Something is wrong. This should not happen" << endl;
+    }
+
+    return 0;
+}

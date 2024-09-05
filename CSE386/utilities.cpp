@@ -363,8 +363,7 @@ double directionInRadians(double x1, double y1, double x2,  double y2) {
  */
 
 double map(double x, double fromLo, double fromHi, double toLow, double toHigh) {
-	/* CSE 386 - todo  */
-	return 0;
+	return (((x - fromLo) / (fromHi - fromLo)) * (toHigh - toLow)) + toLow;
 }
 
 /**
@@ -384,10 +383,22 @@ double map(double x, double fromLo, double fromHi, double toLow, double toHigh) 
  */
 
 vector<double> quadratic(double A, double B, double C) {
-	/* CSE 386 - todo  */
 	vector<double> result;	// put only the roots in here
-	result.push_back(0);
-	result.push_back(1);
+	double discrim = B*B - 4*A*C;
+	if (discrim == 0) {
+		double root = (-B) / (2*A);
+		root == 0 ? result.push_back(0) : result.push_back(root);
+	} else if (discrim > 0) {
+		double root1 = (-B + (glm::sqrt(B*B - 4*A*C)))/ (2*A);
+		double root2 = (-B - (glm::sqrt(B*B - 4*A*C)))/ (2*A);
+		if (root1 > root2) {
+			result.push_back(root2);
+			result.push_back(root1);
+		} else {
+			result.push_back(root1);
+			result.push_back(root2);
+		}
+	}
 	return result;
 }
 
@@ -424,11 +435,18 @@ vector<double> quadratic(double A, double B, double C) {
 */
 
 int quadratic(double A, double B, double C, double roots[2]) {
-	/* CSE 386 - todo  */
-	int rootCnt = 0;
-	roots[0] = 1;
-	roots[1] = 2;
-	return 2;
+	vector<double> temp = quadratic(A,B,C);
+	if (temp.size() == 0) {
+		return 0;
+	} else if (temp.size() == 1) {
+		roots[0] = temp[0];
+		return 1;
+	} else if (temp.size() == 2) {
+		roots[0] = temp[0];
+		roots[1] = temp[1];
+		return 2;
+	}
+	return -1;
 }
 
 /**
