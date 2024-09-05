@@ -106,7 +106,12 @@ double normalizeDegrees(double degrees) {
  */
 
 double normalizeRadians(double rads) {
-	return glm::mod(rads, PI);
+	// if (rads < 0) {
+	// 	return glm::mod(rads, 2 * PI);
+	// } else {
+	// 	return (rads - (rads / 2 * PI) * )
+	// }
+	return glm::mod(rads, 2 * PI);
 }
 
 /**
@@ -301,9 +306,14 @@ dvec2 pointOnCircle(const dvec2& center, double R, double angleRads) {
 */
 
 double directionInRadians(const dvec2& referencePt, const dvec2& targetPt) {
-	double diffX = (targetPt[0] - referencePt[0]);
-	double diffY = (targetPt[1] - referencePt[1]); 
-	return std::atan2(diffY,diffX);
+	double diffX = (targetPt.x - referencePt.x);
+	double diffY = (targetPt.y - referencePt.y);
+	if (diffX == 0 && targetPt.y > referencePt.y) {
+		return normalizeRadians(PI / 2.0);
+	} else if (diffX == 0 && targetPt.y < referencePt.y) {
+		return normalizeRadians((3 * PI) / 2.0);
+	}
+	return normalizeRadians(std::atan2(diffY,diffX));
 }
 
 /**
@@ -317,7 +327,7 @@ double directionInRadians(const dvec2& referencePt, const dvec2& targetPt) {
 */
 
 double directionInRadians(const dvec2& targetPt) {
-	double res = std::atan2(targetPt[1], targetPt[0]);
+	double res = std::atan2(targetPt.y, targetPt.x);
 	return normalizeRadians(res);
 }
 
@@ -338,7 +348,7 @@ double directionInRadians(const dvec2& targetPt) {
 double directionInRadians(double x1, double y1, double x2,  double y2) {
 	double diffX = (x2 - x1);
 	double diffY = (y2 - y1); 
-	return std::atan2(diffY,diffX);
+	return normalizeRadians(std::atan2(diffY,diffX));
 }
 
 /**
