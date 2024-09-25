@@ -65,7 +65,7 @@ VisibleIShape::VisibleIShape(IShapePtr shapePtr, const Material& mat, Image* ima
  */
 
 void VisibleIShape::findClosestIntersection(const Ray& ray, OpaqueHitRecord& hit) const {
-	/* 386 - todo */
+
 	hit.t = FLT_MAX;
 	hit.interceptPt = ORIGIN3D;
 	hit.normal = Y_AXIS;
@@ -161,8 +161,14 @@ IDisk::IDisk(const dvec3& pos, const dvec3& normal, double rad)
  */
 
 void IDisk::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
-	/* CSE 386 - todo  */
 	hit.t = FLT_MAX;
+
+	IPlane plane(center, n);
+
+	plane.findClosestIntersection(ray, hit);
+
+	if (hit.t < FLT_MAX && glm::distance(center, hit.interceptPt) > radius)
+		hit.t = FLT_MAX;
 }
 
 /**
@@ -392,6 +398,20 @@ void IPlane::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
 	hit.t = FLT_MAX;
 	hit.interceptPt = ORIGIN3D;
 	hit.normal = Y_AXIS;
+
+	double denom = glm::dot(ray.dir, this->n);
+
+	if (denom != 0.0) {
+		hit.t = glm::dot(a - ray.origin, this->n) / denom;
+
+		if (hit.t >= 0.0) {
+			hit.interceptPt = ray.getPoint(hit.t);
+
+			hit.normal = n;
+		} else {
+			hit.t = FLT_MAX;
+		}
+	}
 }
 
 /**

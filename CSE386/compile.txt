@@ -1,0 +1,1 @@
+g++ exerciseIntersectionTests.cpp colorandmaterials.cpp ishape.cpp utilities.cpp io.cpp light.cpp defs.cpp -lglut -lGL && ./a.out
