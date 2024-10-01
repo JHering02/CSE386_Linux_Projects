@@ -7,6 +7,7 @@
  * permission is granted.
  ****************************************************/
 
+#include <cstring>
 #include "defs.h"
 #include "utilities.h"
 #include "framebuffer.h"

@@ -26,7 +26,7 @@ enum class FogType { NO_FOG, LINEAR_FOG, EXPONENTIAL_FOG, EXPONENTIAL_2_FOG };
 struct FogParams {
 	double start, end, density;
 	FogType type;
-	color color;
+	color fogColor;
 	FogParams() {
 		start = 0.0;
 		end = 1.0;
