@@ -34,6 +34,7 @@
 #directories
 obj
 bin
+build*
 x64
 Debug
 Release

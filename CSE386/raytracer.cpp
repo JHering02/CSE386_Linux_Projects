@@ -71,7 +71,6 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
  */
 
 color RayTracer::traceIndividualRay(const Ray& ray, const IScene& theScene, int recursionLevel) const {
-	/* CSE 386 - todo  */
-	// This might be a useful helper function.
+	
 	return black;
 }
