@@ -65,11 +65,10 @@ VisibleIShape::VisibleIShape(IShapePtr shapePtr, const Material& mat, Image* ima
  */
 
 void VisibleIShape::findClosestIntersection(const Ray& ray, OpaqueHitRecord& hit) const {
-
-	hit.t = FLT_MAX;
-	hit.interceptPt = ORIGIN3D;
-	hit.normal = Y_AXIS;
-	hit.material = material;
+	shape->findClosestIntersection(ray,hit);
+	if (hit.t < FLT_MAX) {
+		hit.material = material;
+	}
 }
 
 /**
@@ -82,10 +81,16 @@ void VisibleIShape::findClosestIntersection(const Ray& ray, OpaqueHitRecord& hit
 
 void VisibleIShape::findIntersection(const Ray& ray, const vector<VisibleIShapePtr>& surfaces,
 	OpaqueHitRecord& theHit) {
-	/* CSE 386 - todo  */
-	theHit.t = FLT_MAX;
-	theHit.interceptPt = ORIGIN3D;
-	theHit.normal = Y_AXIS;
+	// theHit.t = FLT_MAX;
+	// theHit.interceptPt = ORIGIN3D;
+	// theHit.normal = Y_AXIS;
+	for(size_t i = 0; i < surfaces.size(); ++i) {
+		OpaqueHitRecord hitFS;		
+		VisibleIShape vis = *surfaces[i];
+		vis.findClosestIntersection(ray, hitFS);
+		if (hitFS.t < theHit.t)
+			theHit = hitFS;
+	}
 }
 
 /**

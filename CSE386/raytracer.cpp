@@ -41,16 +41,19 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 			if (DEBUG_PIXEL) {
 				cout << "";
 			}
-			/* CSE 386 - todo  */
-			const VisibleIShape& firstVisibleShape = *theScene.opaqueObjs[0];
-			const IShape& firstShape = *firstVisibleShape.shape;
+			
+			// const VisibleIShape& firstVisibleShape = *theScene.opaqueObjs[0];
+			// const IShape& firstShape = *firstVisibleShape.shape;
 			Ray ray = camera.getRay(x, y);
 			OpaqueHitRecord hit;
-			firstShape.findClosestIntersection(ray, hit);
+			VisibleIShape::findIntersection(ray, theScene.opaqueObjs, hit);
+			// firstShape.findClosestIntersection(ray, hit);
 			if (hit.t != FLT_MAX) {
-				hit.material = firstVisibleShape.material;
+				// hit.material = firstVisibleShape.material;
 				color C = hit.material.diffuse;
 				frameBuffer.setColor(x, y, C);
+			} else {
+				frameBuffer.setColor(x,y,black);
 			}
 			frameBuffer.showAxes(x, y, ray, 0.25);			// Displays R/x, G/y, B/z axes
 		}
