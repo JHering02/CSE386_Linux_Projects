@@ -36,8 +36,10 @@ void render() {
 	int frameStartTime = glutGet(GLUT_ELAPSED_TIME);
 	int width = frameBuffer.getWindowWidth();
 	int height = frameBuffer.getWindowHeight();
+	frameBuffer.setClearColor(green);
 
 	scene.camera = new PerspectiveCamera(cameraPos, cameraFocus, cameraUp, cameraFOV, width, height);
+
 	rayTrace.raytraceScene(frameBuffer, 0, scene);
 
 	int frameEndTime = glutGet(GLUT_ELAPSED_TIME); // Get end time

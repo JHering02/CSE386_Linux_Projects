@@ -20,8 +20,7 @@
    */
 
 color ambientColor(const color& mat, const color& lightColor) {
-	/* CSE 386 - todo  */
-	return mat;
+	return glm::clamp(mat * lightColor, 0.0, 1.0);
 }
 
 /**
@@ -36,8 +35,8 @@ color ambientColor(const color& mat, const color& lightColor) {
 
 color diffuseColor(const color& mat, const color& lightColor,
 	const dvec3& l, const dvec3& n) {
-	/* CSE 386 - todo  */
-	return mat;
+	double dp = glm::dot(l,n);
+	return glm::clamp(mat * lightColor * (glm::max(0.0, dp)), 0.0, 1.0);
 }
 
 /**
@@ -55,8 +54,8 @@ color diffuseColor(const color& mat, const color& lightColor,
 color specularColor(const color& mat, const color& lightColor,
 	double shininess,
 	const dvec3& r, const dvec3& v) {
-	/* CSE 386 - todo  */
-	return mat;
+	double dp = glm::dot(r,v);
+	return glm::clamp(mat * lightColor * (glm::pow(glm::max(0.0,dp), shininess)), 0.0, 1.0);
 }
 
 /**
@@ -83,8 +82,13 @@ color totalColor(const Material& mat, const color& lightColor,
 	const dvec3& lightPos, const dvec3& intersectionPt,
 	bool attenuationOn,
 	const LightATParams& ATparams) {
-	/* CSE 386 - todo  */
-	return mat.diffuse;
+	dvec3 l = glm::normalize(lightPos - intersectionPt);
+	dvec3 r = glm::normalize(glm::reflect(-l,n));
+	double atFactor = attenuationOn ? ATparams.factor(glm::distance(lightPos, intersectionPt)) : 1.0;
+	color ambR = ambientColor(mat.ambient, lightColor);
+	color diffR = atFactor * diffuseColor(mat.diffuse, lightColor, l, n);
+	color specR = atFactor * specularColor(mat.specular, lightColor, mat.shininess, r, v);
+	return glm::clamp((ambR + diffR + specR), 0.0, 1.0);
 }
 
 /**
@@ -105,8 +109,10 @@ color PositionalLight::illuminate(const dvec3& interceptWorldCoords,
 	const Material& material,
 	const Frame& eyeFrame,
 	bool inShadow) const {
-	/* CSE 386 - todo  */
-	return material.diffuse;
+	if (!isOn) return black;
+	else if (inShadow) return ambientColor(material.ambient, lightColor);
+	dvec3 v = glm::normalize(eyeFrame.origin - interceptWorldCoords);
+	return glm::clamp(totalColor(material, this->lightColor, v, normal, this->pos, interceptWorldCoords, this->attenuationIsTurnedOn, this->atParams), 0.0, 1.0);
 }
 
 /*
