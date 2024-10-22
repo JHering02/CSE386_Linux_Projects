@@ -58,12 +58,14 @@ void buildScene() {
 	ISphere* sphere2 = new ISphere(dvec3(-2.0, 0.0, -8.0), 2.0);
 	IEllipsoid* ellipsoid = new IEllipsoid(dvec3(4.0, 0.0, 3.0), dvec3(2.0, 1.0, 2.0));
 	IDisk* disk = new IDisk(dvec3(15.0, 0.0, 0.0), dvec3(0.0, 0.0, 1.0), 5.0);
+	ITriangle* triang = new ITriangle(dvec3(-3.0, 4.0, 0.0), dvec3(3.0, 4.0, 0.0), dvec3(0.0, 7.0, 0.0));
 
 	scene.addOpaqueObject(new VisibleIShape(plane, tin));
 	scene.addOpaqueObject(new VisibleIShape(sphere1, silver));
 	scene.addOpaqueObject(new VisibleIShape(sphere2, bronze));
 	scene.addOpaqueObject(new VisibleIShape(ellipsoid, redPlastic));
 	scene.addOpaqueObject(new VisibleIShape(disk, cyanPlastic));
+	scene.addOpaqueObject(new VisibleIShape(triang, gold));
 
 	scene.addLight(lights[0]);
 }

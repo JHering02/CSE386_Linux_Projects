@@ -9,7 +9,9 @@ cmake_minimum_required(VERSION 3.10)
 # set(MAIN_FILE test)
 # set(MAIN_FILE exerciseIntersectionTests.cpp)
 # set(MAIN_FILE exerciseRaytrace.cpp)
-set(MAIN_FILE exerciseColorTests.cpp)
+# set(MAIN_FILE exerciseColorTests.cpp)
+# set(MAIN_FILE exercisetriangles.cpp)
+set(MAIN_FILE fullraytrace.cpp)
 
 
 # Project name
