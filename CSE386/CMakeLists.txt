@@ -8,7 +8,10 @@ cmake_minimum_required(VERSION 3.10)
 # set(MAIN_FILE exercisebasicgraphics.cpp)
 # set(MAIN_FILE test)
 # set(MAIN_FILE exerciseIntersectionTests.cpp)
-set(MAIN_FILE exerciseRaytrace.cpp)
+# set(MAIN_FILE exerciseRaytrace.cpp)
+# set(MAIN_FILE exerciseColorTests.cpp)
+# set(MAIN_FILE exercisetriangles.cpp)
+set(MAIN_FILE fullraytrace.cpp)
 
 
 # Project name
@@ -20,6 +23,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Compiler flags
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 

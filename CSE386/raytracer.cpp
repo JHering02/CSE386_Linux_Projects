@@ -50,8 +50,15 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 			// firstShape.findClosestIntersection(ray, hit);
 			if (hit.t != FLT_MAX) {
 				// hit.material = firstVisibleShape.material;
-				color C = hit.material.diffuse;
-				frameBuffer.setColor(x, y, C);
+				// color C = hit.material.diffuse;
+				if (glm::dot(ray.dir, hit.normal) > 0) hit.normal = -1.0 * hit.normal;
+
+				bool inShadow = theScene.lights[0] -> pointIsInAShadow(hit.interceptPt, hit.normal, objs, camera.getFrame());
+
+				color col = theScene.lights[0]->illuminate(hit.interceptPt,
+				 hit.normal, hit.material, camera.getFrame(), inShadow);
+
+				frameBuffer.setColor(x, y, col);
 			} else {
 				frameBuffer.setColor(x,y,black);
 			}

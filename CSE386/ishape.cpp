@@ -41,8 +41,7 @@ void IShape::getTexCoords(const dvec3& pt, double& u, double& v) const {
  */
 
 dvec3 IShape::movePointOffSurface(const dvec3& pt, const dvec3& n) {
-	/* CSE 386 - todo  */
-	return pt;
+	return pt + EPSILON * n;
 }
 
 /**
@@ -189,6 +188,65 @@ void IDisk::getTexCoords(const dvec3& pt, double& u, double& v) const {
 	u = map(pt.x, center.x - radius, center.x + radius, 0.0, 1.0);
 	v = map(pt.y, center.y - radius, center.y + radius, 0.0, 1.0);
 	v = 1.0 - v;
+}
+
+/**
+* @fnITriangle::ITriangle(const dvec3 &A, const dvec3 &B, const dvec3 &C)
+* @briefConstructs and implicit representation of a triangle, given three
+vertices
+* presented in counterclockwise order.
+* @paramA First vertex.
+* @paramB Second vertex.
+* @paramC Third vertex.
+*/
+
+ITriangle::ITriangle(const dvec3& A, const dvec3& B, const dvec3& C)
+: IShape(), a(A), b(B), c(C) {
+}
+
+/**
+ * @fn void ITriangle::findClosestIntersection(const Ray &ray, HitRecord &hit) const
+ * @brief Searches for the nearest intersection
+ * @param ray The ray.
+ * @param [in,out] hitHit record.
+ */
+
+void ITriangle::findClosestIntersection(const Ray &ray, HitRecord &hit) const
+{
+	dvec3 n = normalFrom3Points(a, b, c);
+	IPlane plane(a, n);
+	plane.findClosestIntersection(ray, hit);
+	if (hit.t != FLT_MAX && !inside(hit.interceptPt))
+	{
+		hit.t = FLT_MAX;
+	}
+}
+
+/**
+ * @fn bool ITriangle::inside(const dvec3 &pt) const
+ * @brief Insides the given point
+ * @param pt The point.
+ * @return true iff the point is inside the triangle.
+ */
+
+bool ITriangle::inside(const dvec3 &pt) const
+{
+	// Method 1
+	// double bigA = areaOfTriangle(a, b, c);
+	// double abptA = areaOfTriangle(a, b, pt);
+	// double bcptA = areaOfTriangle(b, c, pt);
+	// double captA = areaOfTriangle(c, a, pt);
+	// return approximatelyEqual(bigA,(abptA + bcptA + captA));
+
+	// Method 2
+	dvec3 normal = glm::cross(b - a, c - a);
+	dvec3 na = glm::cross(c - b, pt - b);
+	dvec3 nb = glm::cross(a - c, pt - c);
+	dvec3 nc = glm::cross(b - a, pt - a);
+	double alph = glm::dot(normal, na) / glm::pow(glm::length(normal), 2); 
+	double bet =  glm::dot(normal, nb) / glm::pow(glm::length(normal), 2);
+	double gam =  glm::dot(normal, nc) / glm::pow(glm::length(normal), 2);
+	return inRangeInclusive(alph, 0.0, 1.0f) && inRangeInclusive(bet, 0.0, 1.0f) && inRangeInclusive(gam, 0.0, 1.0f);
 }
 
 /**
@@ -759,12 +817,26 @@ ICylinderY::ICylinderY(const dvec3& pos, double rad, double len)
 void ICylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
 	HitRecord hits[2];
 	int numHits = IQuadricSurface::findIntersections(ray, hits);
-
-	if (numHits == 0) {
-		hit.t = FLT_MAX;
-	} else {
-		hit = hits[0];
+	if (numHits != 0)
+	{
+		for (HitRecord cHit : hits) // Return the first hit iin the target area
+		{
+			if (glm::distance(cHit.interceptPt, center) <= length)
+			hit = hits[0];
+		}
 	}
+	
+
+	// if (numHits == 0)
+	// {
+
+	// 	hit.t = FLT_MAX;
+	// }
+	// else
+	// {
+
+	// 	hit = hits[0];
+	// }
 }
 
 /**
