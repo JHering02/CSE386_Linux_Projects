@@ -41,8 +41,7 @@ void IShape::getTexCoords(const dvec3& pt, double& u, double& v) const {
  */
 
 dvec3 IShape::movePointOffSurface(const dvec3& pt, const dvec3& n) {
-	/* CSE 386 - todo  */
-	return pt;
+	return pt + EPSILON * n;
 }
 
 /**
@@ -818,12 +817,26 @@ ICylinderY::ICylinderY(const dvec3& pos, double rad, double len)
 void ICylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
 	HitRecord hits[2];
 	int numHits = IQuadricSurface::findIntersections(ray, hits);
-
-	if (numHits == 0) {
-		hit.t = FLT_MAX;
-	} else {
-		hit = hits[0];
+	if (numHits != 0)
+	{
+		for (HitRecord cHit : hits) // Return the first hit iin the target area
+		{
+			if (glm::distance(cHit.interceptPt, center) <= length)
+			hit = hits[0];
+		}
 	}
+	
+
+	// if (numHits == 0)
+	// {
+
+	// 	hit.t = FLT_MAX;
+	// }
+	// else
+	// {
+
+	// 	hit = hits[0];
+	// }
 }
 
 /**

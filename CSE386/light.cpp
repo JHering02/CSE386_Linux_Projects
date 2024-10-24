@@ -50,7 +50,6 @@ color diffuseColor(const color& mat, const color& lightColor,
  * @param	v		 	Viewing vector.
  * @return	Specular color.
  */
-
 color specularColor(const color& mat, const color& lightColor,
 	double shininess,
 	const dvec3& r, const dvec3& v) {
@@ -140,8 +139,10 @@ bool PositionalLight::pointIsInAShadow(const dvec3& intercept,
 	const dvec3& normal,
 	const vector<VisibleIShapePtr>& objects,
 	const Frame& eyeFrame) const {
-	/* CSE 386 - todo  */
-	return false;
+	Ray shFeel = getShadowFeeler(intercept, normal, eyeFrame);
+	OpaqueHitRecord hit;
+	VisibleIShape::findIntersection(shFeel, objects, hit);
+	return (hit.t < glm::distance(this->pos, intercept)) ? true : false;
 }
 
 /**
@@ -155,9 +156,8 @@ bool PositionalLight::pointIsInAShadow(const dvec3& intercept,
 Ray PositionalLight::getShadowFeeler(const dvec3& interceptWorldCoords,
 	const dvec3& normal,
 	const Frame& eyeFrame) const {
-	/* 386 - todo */
-	dvec3 origin(0, 0, 0);
-	dvec3 dir(1, 1, 1);
+	dvec3 origin(IShape::movePointOffSurface(interceptWorldCoords, normal));
+	dvec3 dir(glm::normalize(this->pos - interceptWorldCoords));
 	Ray shadowFeeler(origin, dir);
 	return shadowFeeler;
 }
