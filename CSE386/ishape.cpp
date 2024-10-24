@@ -819,7 +819,7 @@ void ICylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
 	int numHits = IQuadricSurface::findIntersections(ray, hits);
 	if (numHits != 0)
 	{
-		for (HitRecord cHit : hits) // Return the first hit iin the target area
+		for (const HitRecord cHit : hits) // Return the first hit iin the target area
 		{
 			if (glm::distance(cHit.interceptPt, center) <= length)
 			hit = hits[0];
