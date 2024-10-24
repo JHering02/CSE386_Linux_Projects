@@ -42,3 +42,6 @@ packages
 .vs
 .DS_Store
 CSE386.sln
+CSE386.sln
+CSE386/CSE386.vcxproj
+CSE386/CSE386.vcxproj.filters
