@@ -29,7 +29,7 @@ RayTracer::RayTracer(const color& defa)
  */
 
 void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
-	const IScene& theScene, const int& N = 1) const {
+	const IScene& theScene, const int& N) const {
 	const RaytracingCamera& camera = *theScene.camera;
 	const vector<VisibleIShapePtr>& objs = theScene.opaqueObjs;
 	const vector<LightSourcePtr>& lights = theScene.lights;
@@ -42,14 +42,14 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 				cout << "";
 			}
 			
-			// const VisibleIShape& firstVisibleShape = *theScene.opaqueObjs[0];
-			// const IShape& firstShape = *firstVisibleShape.shape;
-			std::vector<Ray> rays;
-			for (int col = 0; col < N; ++col) {
-				for (int row = 0; row < N; ++row) {
-					rays.push_back(Ray(camera.getRay(x * col, y * row, N)));
-				}
-			}
+			const VisibleIShape& firstVisibleShape = *theScene.opaqueObjs[0];
+			const IShape& firstShape = *firstVisibleShape.shape;
+			// std::vector<Ray> rays;
+			// for (int col = 0; col < N; ++col) {
+			// 	for (int row = 0; row < N; ++row) {
+			// 		rays.push_back(Ray(camera.getRay(x * col, y * row, N)));
+			// 	}
+			// }
 			Ray ray = camera.getRay(x, y);
 			OpaqueHitRecord hit;
 			VisibleIShape::findIntersection(ray, theScene.opaqueObjs, hit);
