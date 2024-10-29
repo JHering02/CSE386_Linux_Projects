@@ -11,8 +11,8 @@ cmake_minimum_required(VERSION 3.10)
 # set(MAIN_FILE exerciseRaytrace.cpp)
 # set(MAIN_FILE exerciseColorTests.cpp)
 # set(MAIN_FILE exercisetriangles.cpp)
-set(MAIN_FILE fullraytrace.cpp)
-
+# set(MAIN_FILE fullraytrace.cpp)
+set(MAIN_FILE exercisespotlightcone.cpp)
 
 # Project name
 project(CSE386 LANGUAGES CXX)

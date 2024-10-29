@@ -90,8 +90,10 @@ OrthographicCamera::OrthographicCamera(const dvec3& pos, const dvec3& lookAtPt, 
  * @return	Projection plane coordinates.
  */
 
-dvec2 RaytracingCamera::getProjectionPlaneCoordinates(double x, double y) const {
+dvec2 RaytracingCamera::getProjectionPlaneCoordinates(double x, double y, const int& N = 1) const {
 	dvec2 s;
+	// s.x = map(x + 1.0 / (2.0 * N), 0, nx, left, right);
+	// s.y = map(y + 1.0 / (2.0 * N), 0, ny, bottom, top);
 	s.x = map(x + 0.5, 0, nx, left, right);
 	s.y = map(y + 0.5, 0, ny, bottom, top);
 	return s;
@@ -151,8 +153,8 @@ void OrthographicCamera::setupViewingParameters(int W, int H) {
  * @return	The ray through the projection plane at (x, y), in direction -w.
  */
 
-Ray OrthographicCamera::getRay(double x, double y) const {
-	dvec2 uv = getProjectionPlaneCoordinates(x, y);
+Ray OrthographicCamera::getRay(double x, double y, const int& N = 1) const {
+	dvec2 uv = getProjectionPlaneCoordinates(x, y, N);
 	return Ray(cameraFrame.origin + uv.x * cameraFrame.u + uv.y * cameraFrame.v, -cameraFrame.w);
 }
 
@@ -164,8 +166,8 @@ Ray OrthographicCamera::getRay(double x, double y) const {
  * @return	The ray eminating from camera through the projection plane at (x, y).
  */
 
-Ray PerspectiveCamera::getRay(double x, double y) const {
-	dvec2 uv = getProjectionPlaneCoordinates(x, y);
+Ray PerspectiveCamera::getRay(double x, double y, const int& N = 1) const {
+	dvec2 uv = getProjectionPlaneCoordinates(x, y, N);
 	dvec3 rayDirection = glm::normalize(-distToPlane * cameraFrame.w +
 		uv.x * cameraFrame.u +
 		uv.y * cameraFrame.v);

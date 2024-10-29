@@ -817,12 +817,16 @@ ICylinderY::ICylinderY(const dvec3& pos, double rad, double len)
 void ICylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
 	HitRecord hits[2];
 	int numHits = IQuadricSurface::findIntersections(ray, hits);
+	hit.t = FLT_MAX;
 	if (numHits != 0)
 	{
-		for (const HitRecord cHit : hits) // Return the first hit iin the target area
+		for (const HitRecord& cHit : hits) // Return the first hit iin the target area
 		{
-			if (glm::distance(cHit.interceptPt, center) <= length)
-			hit = hits[0];
+			if (cHit.interceptPt.y >= center.y && cHit.interceptPt.y <= center.y + length)
+			{
+				hit = cHit;
+				return;
+			}
 		}
 	}
 	

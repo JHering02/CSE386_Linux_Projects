@@ -29,7 +29,7 @@ RayTracer::RayTracer(const color& defa)
  */
 
 void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
-	const IScene& theScene) const {
+	const IScene& theScene, const int& N = 1) const {
 	const RaytracingCamera& camera = *theScene.camera;
 	const vector<VisibleIShapePtr>& objs = theScene.opaqueObjs;
 	const vector<LightSourcePtr>& lights = theScene.lights;
@@ -44,9 +44,16 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 			
 			// const VisibleIShape& firstVisibleShape = *theScene.opaqueObjs[0];
 			// const IShape& firstShape = *firstVisibleShape.shape;
+			std::vector<Ray> rays;
+			for (int col = 0; col < N; ++col) {
+				for (int row = 0; row < N; ++row) {
+					rays.push_back(Ray(camera.getRay(x * col, y * row, N)));
+				}
+			}
 			Ray ray = camera.getRay(x, y);
 			OpaqueHitRecord hit;
 			VisibleIShape::findIntersection(ray, theScene.opaqueObjs, hit);
+
 			// firstShape.findClosestIntersection(ray, hit);
 			if (hit.t != FLT_MAX) {
 				// hit.material = firstVisibleShape.material;
@@ -54,11 +61,15 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 				if (glm::dot(ray.dir, hit.normal) > 0) hit.normal = -1.0 * hit.normal;
 
 				bool inShadow = theScene.lights[0] -> pointIsInAShadow(hit.interceptPt, hit.normal, objs, camera.getFrame());
-
+				color sum = black;
 				color col = theScene.lights[0]->illuminate(hit.interceptPt,
 				 hit.normal, hit.material, camera.getFrame(), inShadow);
-
-				frameBuffer.setColor(x, y, col);
+				if (N > 1) {
+					for (int i = 0; i < N; ++i) {
+						sum += col;
+					}
+				}
+				(N > 1) ? frameBuffer.setColor(x,y, (sum / glm::pow(N,2))) : frameBuffer.setColor(x, y, col);
 			} else {
 				frameBuffer.setColor(x,y,black);
 			}
