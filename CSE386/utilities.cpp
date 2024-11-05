@@ -628,7 +628,7 @@ bool isInvertible(const dmat3& mat) {
 
 dmat3 addMatrices(const vector<dmat3>& M) {
 	dmat3 sum(0,0,0,0,0,0,0,0,0);
-	for (dmat3 mat: M) {
+	for (auto& mat: M) {
 		sum += mat;
 	}
 	return sum;
@@ -683,7 +683,7 @@ dvec3 multiplyMatricesAndVertex(const vector<dmat3>& M, const dvec3& x) {
 
 vector<dvec3> multiplyMatrixAndVertices(const dmat3& M, const vector<dvec3>& verts) {
 	vector<dvec3> result;
-	for (dvec3 vert : verts) {
+	for (auto& vert : verts) {
 		result.push_back(M * vert);
 	}
 	return result;
