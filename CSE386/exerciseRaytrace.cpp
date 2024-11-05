@@ -39,7 +39,7 @@ void render() {
 	scene.camera = new PerspectiveCamera(cameraPos, cameraFocus, cameraUp, cameraFOV, width, height);
 
 	frameBuffer.setClearColor(paleGreen);
-	rayTrace.raytraceScene(frameBuffer, 0, scene);
+	rayTrace.raytraceScene(frameBuffer, 0, scene, 1);
 
 	int frameEndTime = glutGet(GLUT_ELAPSED_TIME); // Get end time
 	double totalTimeSec = (frameEndTime - frameStartTime) / 1000.0;

@@ -111,7 +111,7 @@ double normalizeRadians(double rads) {
 	// } else {
 	// 	return (rads - (rads / 2 * PI) * )
 	// }
-	return glm::mod(rads, 2 * PI);
+	return glm::mod(rads, TWO_PI);
 }
 
 /**
@@ -357,7 +357,8 @@ double directionInRadians(double x1, double y1, double x2,  double y2) {
  */
 
 double map(double x, double fromLo, double fromHi, double toLow, double toHigh) {
-	return (((x - fromLo) / (fromHi - fromLo)) * (toHigh - toLow)) + toLow;
+	if (fromHi == toLow) return toLow;
+	return (((x - fromLo) / (fromHi - fromLo)) * (toHigh - toLow) + toLow);
 }
 
 /**

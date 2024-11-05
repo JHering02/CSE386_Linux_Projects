@@ -59,24 +59,33 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 				// hit.material = firstVisibleShape.material;
 				// color C = hit.material.diffuse;
 				if (glm::dot(ray.dir, hit.normal) > 0) hit.normal = -1.0 * hit.normal;
-
 				bool inShadow = theScene.lights[0] -> pointIsInAShadow(hit.interceptPt, hit.normal, objs, camera.getFrame());
 				color sum = black;
 				color col = theScene.lights[0]->illuminate(hit.interceptPt,
 				 hit.normal, hit.material, camera.getFrame(), inShadow);
-				if (N > 1) {
-					for (int i = 0; i < N; ++i) {
-						sum += col;
+				if (hit.texture != nullptr) {
+					sum = hit.texture->getPixelUV(hit.u, hit.v);
+					frameBuffer.setColor(x,y,glm::clamp(sum,0.0,1.0));
+				} else {
+					for (auto& light : theScene.lights) {
+						bool inShadow = light->pointIsInAShadow(hit.interceptPt,hit.normal,objs, camera.getFrame());
+						sum += light->illuminate(hit.interceptPt, hit.normal, hit.material, camera.getFrame(), inShadow);
 					}
+					frameBuffer.setColor(x,y,glm::clamp(sum,0.0,1.0));
 				}
-				(N > 1) ? frameBuffer.setColor(x,y, (sum / glm::pow(N,2))) : frameBuffer.setColor(x, y, col);
+				// Anti Aliasing Concept
+				// if (N > 1) {
+				// 	for (int i = 0; i < N; ++i) {
+				// 		sum += col;
+				// 	}
+				// }
+				// (N > 1) ? frameBuffer.setColor(x,y, (sum / glm::pow(N,2))) : frameBuffer.setColor(x, y, col);
 			} else {
 				frameBuffer.setColor(x,y,black);
 			}
 			frameBuffer.showAxes(x, y, ray, 0.25);			// Displays R/x, G/y, B/z axes
 		}
 	}
-
 	frameBuffer.showColorBuffer();
 }
 

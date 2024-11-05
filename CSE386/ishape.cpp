@@ -67,6 +67,8 @@ void VisibleIShape::findClosestIntersection(const Ray& ray, OpaqueHitRecord& hit
 	shape->findClosestIntersection(ray,hit);
 	if (hit.t < FLT_MAX) {
 		hit.material = material;
+		hit.texture = texture;
+		if (hit.texture != nullptr) shape->getTexCoords(hit.interceptPt, hit.u, hit.v);
 	}
 }
 
@@ -84,7 +86,7 @@ void VisibleIShape::findIntersection(const Ray& ray, const vector<VisibleIShapeP
 	// theHit.interceptPt = ORIGIN3D;
 	// theHit.normal = Y_AXIS;
 	for(size_t i = 0; i < surfaces.size(); ++i) {
-		OpaqueHitRecord hitFS;		
+		OpaqueHitRecord hitFS;
 		VisibleIShape vis = *surfaces[i];
 		vis.findClosestIntersection(ray, hitFS);
 		if (hitFS.t < theHit.t)
@@ -818,19 +820,18 @@ void ICylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
 	HitRecord hits[2];
 	int numHits = IQuadricSurface::findIntersections(ray, hits);
 	hit.t = FLT_MAX;
-	if (numHits != 0)
+	if (numHits > 0)
 	{
 		for (const HitRecord& cHit : hits) // Return the first hit iin the target area
 		{
-			if (cHit.interceptPt.y >= center.y && cHit.interceptPt.y <= center.y + length)
+
+			if (cHit.interceptPt.y >= center.y - length / 2 && cHit.interceptPt.y <= center.y + length / 2)
 			{
 				hit = cHit;
 				return;
 			}
 		}
 	}
-	
-
 	// if (numHits == 0)
 	// {
 
@@ -852,10 +853,29 @@ void ICylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
 */
 
 void ICylinderY::getTexCoords(const dvec3& pt, double& u, double& v) const {
-	/* CSE 386 - todo  */
-	u = v = 0.0;
+	v = 1 - map(pt.y, center.y - length / 2, center.y + length / 2, 0.0, 1.0);
+	double dir = normalizeRadians(directionInRadians(center.xz(), pt.xz()));
+	u = map(dir, 0.0, TWO_PI, 0.0, 1.0);
 }
 
+IClosedCylinderY::IClosedCylinderY() 
+	: ICylinder(ORIGIN3D, 1.0, 1.0, QuadricParameters::cylinderYQParams(1.0)) {
+}
+
+IClosedCylinderY::IClosedCylinderY(const dvec3& position, double R, double len, IDisk& top, IDisk& bottom)
+	: ICylinder(position, R, len, QuadricParameters::cylinderYQParams(R)) {
+		this->top = IDisk(top);
+		this->bottom = IDisk(bottom);
+		this->body = ICylinderY(position, R, len);
+}
+
+void IClosedCylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
+	HitRecord bodHit, topHit, botHit;
+	body.findClosestIntersection(ray, bodHit);
+	top.findClosestIntersection(ray, topHit);
+	bottom.findClosestIntersection(ray, botHit);
+
+}
 /**
  * @fn	IEllipsoid::IEllipsoid(const dvec3 &position, const dvec3 &sz)
  * @brief	Constructs an implicit representation of an ellipsoid.

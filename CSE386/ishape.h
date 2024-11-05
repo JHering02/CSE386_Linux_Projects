@@ -223,6 +223,17 @@ struct ICylinderY : public ICylinder {
 	void getTexCoords(const dvec3& pt, double& u, double& v) const;
 };
 
+struct IClosedCylinderY : public ICylinder {
+	IClosedCylinderY();
+	IClosedCylinderY(const dvec3& position, double R, double len, IDisk& top, IDisk& bottom);
+	virtual void findClosestIntersection(const Ray& ray, HitRecord& hit) const;
+	// void getTexCoords(const dvec3& pt, double& u, double& v) const;
+	ICylinderY body;
+	IDisk top;
+	IDisk bottom;
+};
+
+
 /**
  * @struct	IEllipsoid
  * @brief	Implicit representation of an ellipsoid.
