@@ -591,9 +591,8 @@ dvec3 pointingVector(const dvec3& pt1, const dvec3& pt2) {
 * @return	The extracted row.
 */
 
-dvec3 getRow(const dmat3& mat, int row) {
-	/* CSE 386 - todo  */
-	return dvec3(0, 0, 0);
+dvec3 getRow(const dmat3 &mat, int row) {
+	return glm::transpose(mat)[row];
 }
 
 /**
@@ -605,8 +604,7 @@ dvec3 getRow(const dmat3& mat, int row) {
  */
 
 dvec3 getCol(const dmat3& mat, int col) {
-	/* CSE 386 - todo  */
-	return dvec3(0, 0, 0);
+	return mat[col];
 }
 
 /**
@@ -618,8 +616,7 @@ dvec3 getCol(const dmat3& mat, int col) {
  */
 
 bool isInvertible(const dmat3& mat) {
-	/* CSE 386 - todo  */
-	return false;
+	return glm::determinant(mat) != 0;
 }
 
 /**
@@ -630,8 +627,11 @@ bool isInvertible(const dmat3& mat) {
  */
 
 dmat3 addMatrices(const vector<dmat3>& M) {
-	/* CSE 386 - todo  */
-	return dmat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+	dmat3 sum(0,0,0,0,0,0,0,0,0);
+	for (dmat3 mat: M) {
+		sum += mat;
+	}
+	return sum;
 }
 
 /**
@@ -642,9 +642,11 @@ dmat3 addMatrices(const vector<dmat3>& M) {
  */
 
 dmat3 multiplyMatrices(const vector<dmat3>& M) {
-	/* CSE 386 - todo  */
-	dmat3 result;
-	return result;
+	dmat3 prod = M[0];
+	for (size_t i = 1; i < M.size(); i++) {
+		prod *= M[i];
+	}
+	return prod;
 }
 
 /**
@@ -656,8 +658,7 @@ dmat3 multiplyMatrices(const vector<dmat3>& M) {
  */
 
 dvec3 multiplyMatrixAndVertex(const dmat3& M, const dvec3& x) {
-	/* CSE 386 - todo  */
-	return dvec3(0, 0, 0);
+	return M * x;
 }
 
 /**
@@ -669,8 +670,7 @@ dvec3 multiplyMatrixAndVertex(const dmat3& M, const dvec3& x) {
  */
 
 dvec3 multiplyMatricesAndVertex(const vector<dmat3>& M, const dvec3& x) {
-	/* CSE 386 - todo  */
-	return dvec3(0, 0, 0);
+	return multiplyMatrices(M) * x;
 }
 
 /**
@@ -682,8 +682,10 @@ dvec3 multiplyMatricesAndVertex(const vector<dmat3>& M, const dvec3& x) {
  */
 
 vector<dvec3> multiplyMatrixAndVertices(const dmat3& M, const vector<dvec3>& verts) {
-	/* CSE 386 - todo  */
 	vector<dvec3> result;
+	for (dvec3 vert : verts) {
+		result.push_back(M * vert);
+	}
 	return result;
 }
 
@@ -697,9 +699,7 @@ vector<dvec3> multiplyMatrixAndVertices(const dmat3& M, const vector<dvec3>& ver
  */
 
 vector<dvec3> multiplyMatricesAndVertices(const vector<dmat3>& M, const vector<dvec3>& verts) {
-	/* CSE 386 - todo  */
-	vector<dvec3> result;
-	return result;
+	return multiplyMatrixAndVertices(multiplyMatrices(M), verts);
 }
 
 /**
