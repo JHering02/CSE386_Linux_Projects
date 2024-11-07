@@ -89,13 +89,29 @@ OrthographicCamera::OrthographicCamera(const dvec3& pos, const dvec3& lookAtPt, 
  * @param	y	The y coordinate.
  * @return	Projection plane coordinates.
  */
-// const int& N = 1
+
 dvec2 RaytracingCamera::getProjectionPlaneCoordinates(double x, double y) const {
 	dvec2 s;
-	// s.x = map(x + 1.0 / (2.0 * N), 0, nx, left, right);
-	// s.y = map(y + 1.0 / (2.0 * N), 0, ny, bottom, top);
 	s.x = map(x + 0.5, 0, nx, left, right);
 	s.y = map(y + 0.5, 0, ny, bottom, top);
+	return s;
+}
+
+/**
+ * @fn	dvec2 RaytracingCamera::getProjectionPlaneCoordinates(double x, double y) const
+ * @brief	Gets projection plane coordinates at (x, y).
+ * @param	x	The x coordinate.
+ * @param	y	The y coordinate.
+ * @param	row	Anti-aliasing matrix row
+ * @param	col	Anti-aliasing matrix col
+ * @param	N	N value for Anti-aliasing
+ * @return	Projection plane coordinates.
+ */
+
+dvec2 RaytracingCamera::getProjectionPlaneCoordinates(double x, double y, const int& row, const int& col, const int& N) const {
+	dvec2 s;
+	s.x = map(x + (row * (1.0 / (2.0 * N))), 0, nx, left, right);
+	s.y = map(y + (col * (1.0 / (2.0 * N))), 0, ny, bottom, top);
 	return s;
 }
 
@@ -152,10 +168,25 @@ void OrthographicCamera::setupViewingParameters(int W, int H) {
  * @param	y	The y coordinate.
  * @return	The ray through the projection plane at (x, y), in direction -w.
  */
-// , const int& N = 1
+
 Ray OrthographicCamera::getRay(double x, double y) const {
-	// dvec2 uv = getProjectionPlaneCoordinates(x, y, N);
 	dvec2 uv = getProjectionPlaneCoordinates(x, y);
+	return Ray(cameraFrame.origin + uv.x * cameraFrame.u + uv.y * cameraFrame.v, -cameraFrame.w);
+}
+
+/**
+ * @fn	Ray OrthographicCamera::getRay(double x, double y) const
+ * @brief	Determines camera ray going through projection plane at (x, y), in direction -w.
+ * @param	x	The x coordinate.
+ * @param	y	The y coordinate.
+ * @param	row	Anti-aliasing matrix row
+ * @param	col	Anti-aliasing matrix col
+ * @param	N	N value for Anti-aliasing
+ * @return	The ray through the projection plane at (x, y), in direction -w.
+ */
+
+Ray OrthographicCamera::getRay(double x, double y, const int& row, const int& col, const int& N) const {
+	dvec2 uv = getProjectionPlaneCoordinates(x, y, row, col, N);
 	return Ray(cameraFrame.origin + uv.x * cameraFrame.u + uv.y * cameraFrame.v, -cameraFrame.w);
 }
 
@@ -166,10 +197,28 @@ Ray OrthographicCamera::getRay(double x, double y) const {
  * @param	y	The y coordinate.
  * @return	The ray eminating from camera through the projection plane at (x, y).
  */
-// , const int& N = 1
+
 Ray PerspectiveCamera::getRay(double x, double y) const {
-	// dvec2 uv = getProjectionPlaneCoordinates(x, y, N);
 	dvec2 uv = getProjectionPlaneCoordinates(x, y);
+	dvec3 rayDirection = glm::normalize(-distToPlane * cameraFrame.w +
+		uv.x * cameraFrame.u +
+		uv.y * cameraFrame.v);
+	return Ray(cameraFrame.origin, rayDirection);
+}
+
+/**
+ * @fn	Ray PerspectiveCamera::getRay(double x, double y) const
+ * @brief	Determines ray eminating from camera through the projection plane at (x, y).
+ * @param	x	The x coordinate.
+ * @param	y	The y coordinate.
+ * @param	row	Anti-aliasing matrix row
+ * @param	col	Anti-aliasing matrix col
+ * @param	N	N value for Anti-aliasing
+ * @return	The ray eminating from camera through the projection plane at (x, y).
+ */
+
+Ray PerspectiveCamera::getRay(double x, double y, const int& row, const int& col, const int& N) const {
+	dvec2 uv = getProjectionPlaneCoordinates(x, y, row, col, N);
 	dvec3 rayDirection = glm::normalize(-distToPlane * cameraFrame.w +
 		uv.x * cameraFrame.u +
 		uv.y * cameraFrame.v);
