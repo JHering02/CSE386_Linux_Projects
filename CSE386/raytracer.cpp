@@ -41,24 +41,29 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 			if (DEBUG_PIXEL) {
 				cout << "";
 			}
-			
 			const VisibleIShape& firstVisibleShape = *theScene.opaqueObjs[0];
 			const IShape& firstShape = *firstVisibleShape.shape;
 			// Anti Aliasing
-			Ray ray = camera.getRay(x, y);
+			Ray singlRay = camera.getRay(x, y);
 			if (N > 1) {
 				std::vector<Ray> rays;
+				color sum = black;
+				// For AA, do this for each ray in the vec, and add em up, divide by N^2
 				for (int col = 1; col <= N; col++) {
 					for (int row = 1; row <= N; row++) {
 						rays.push_back(Ray(camera.getRay(x, y, row, col, N)));
 					}
 				}
+				for (auto& ray : rays) {
+					sum += glm::clamp(traceIndividualRay(ray, theScene, camera, objs, lights, depth), 0.0, 1.0);
+					frameBuffer.showAxes(x, y, ray, 0.25);			// Displays R/x, G/y, B/z axes
+				}
+				frameBuffer.setColor(x,y, (sum / glm::pow(N,2)));
 			} else {
-				frameBuffer.setColor(x,y,glm::clamp(traceIndividualRay(camera.getRay(x,y), theScene, 0), 0.0, 1.0));
+				frameBuffer.setColor(x,y,glm::clamp(traceIndividualRay(singlRay, theScene, camera, objs, lights, depth), 0.0, 1.0));
+				frameBuffer.showAxes(x, y, singlRay, 0.25);			// Displays R/x, G/y, B/z axes
 			}
-			// // For AA, do this for each ray in the vec, and add em up, divide by N^2 
 			// // consider moving this to helper method.
-
 			// // firstShape.findClosestIntersection(ray, hit);
 			// OpaqueHitRecord hit;
 			// VisibleIShape::findIntersection(ray, theScene.opaqueObjs, hit);
@@ -84,7 +89,6 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 			// } else {
 			// 	frameBuffer.setColor(x,y,black);
 			// }
-			// frameBuffer.showAxes(x, y, ray, 0.25);			// Displays R/x, G/y, B/z axes
 		}
 	}
 	frameBuffer.showColorBuffer();
@@ -101,35 +105,34 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
  * @return	The color to be displayed as a result of this ray.
  */
 
-color RayTracer::traceIndividualRay(const Ray& ray, const IScene& theScene, int recursionLevel) const {
-			// 	// For AA, do this for each ray in the vec, and add em up, divide by N^2 
-			// // consider moving this to helper method.
-
-			// // firstShape.findClosestIntersection(ray, hit);
-			// OpaqueHitRecord hit;
-			// VisibleIShape::findIntersection(ray, theScene.opaqueObjs, hit);
-			// if (hit.t != FLT_MAX) {
-			// 	// hit.material = firstVisibleShape.material;
-			// 	// color C = hit.material.diffuse;
-			// 	if (glm::dot(ray.dir, hit.normal) > 0) hit.normal = -1.0 * hit.normal;
-			// 	bool inShadow = theScene.lights[0] -> pointIsInAShadow(hit.interceptPt, hit.normal, objs, camera.getFrame());
-			// 	color sum = black;
-			// 	color col = theScene.lights[0]->illuminate(hit.interceptPt,
-			// 	 hit.normal, hit.material, camera.getFrame(), inShadow);
-			// 	if (hit.texture != nullptr) {
-			// 		sum = hit.texture->getPixelUV(hit.u, hit.v);
-			// 		frameBuffer.setColor(x,y,glm::clamp(sum,0.0,1.0));
-			// 	} else {
-			// 		for (auto& light : theScene.lights) {
-			// 			bool inShadow = light->pointIsInAShadow(hit.interceptPt,hit.normal,objs, camera.getFrame());
-			// 			sum += light->illuminate(hit.interceptPt, hit.normal, hit.material, camera.getFrame(), inShadow);
-			// 		}
-			// 		frameBuffer.setColor(x,y,glm::clamp(sum,0.0,1.0));
-			// 	}
-			// 	// (N > 1) ? frameBuffer.setColor(x,y, (sum / glm::pow(N,2))) : frameBuffer.setColor(x,y,glm::clamp(sum,0.0,1.0));
-			// } else {
-			// 	frameBuffer.setColor(x,y,black);
-			// }
-			// frameBuffer.showAxes(x, y, ray, 0.25);			// Displays R/x, G/y, B/z axes
+color RayTracer::traceIndividualRay(const Ray& ray, const IScene& theScene, const RaytracingCamera& camera, 
+const vector<VisibleIShapePtr> &objs, const vector<LightSourcePtr> &lights, int recursionLevel) const {
+	// consider moving this to helper method.
+	// firstShape.findClosestIntersection(ray, hit);
+	OpaqueHitRecord hit;
+	VisibleIShape::findIntersection(ray, objs, hit);
+	if (hit.t != FLT_MAX) {
+		// hit.material = firstVisibleShape.material;
+		// color C = hit.material.diffuse;
+		if (glm::dot(ray.dir, hit.normal) > 0)
+			hit.normal = -1.0 * hit.normal;
+		bool inShadow = lights[0]->pointIsInAShadow(hit.interceptPt, hit.normal, objs, camera.getFrame());
+		color sum = black;
+		if (hit.texture != nullptr) {
+			sum = hit.texture->getPixelUV(hit.u, hit.v);
+		} else {
+			for (auto &light : lights) {
+				bool inShadow = light->pointIsInAShadow(hit.interceptPt, hit.normal, objs, camera.getFrame());
+				sum += light->illuminate(hit.interceptPt, hit.normal, hit.material, camera.getFrame(), inShadow);
+			}
+		}
+		color res = glm::clamp(sum, 0.0, 1.0);
+		if (recursionLevel > 0) {
+			Ray recRay(hit.interceptPt, ray.dir - (2 * glm::dot(ray.dir, hit.normal) * hit.normal));
+			return res + traceIndividualRay(recRay, theScene, camera, objs, lights, recursionLevel--);
+		} 
+		return res;
+	}
 	return black;
 }
+

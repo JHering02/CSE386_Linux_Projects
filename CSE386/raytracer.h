@@ -26,4 +26,6 @@ struct RayTracer {
 		const IScene& theScene, const int& N) const;
 protected:
 	color traceIndividualRay(const Ray& ray, const IScene& theScene, int recursionLevel) const;
+	color RayTracer::traceIndividualRay(const Ray& ray, const IScene& theScene, const RaytracingCamera& camera, 
+	const vector<VisibleIShapePtr> &objs, const vector<LightSourcePtr> &lights, int recursionLevel) const;
 };
