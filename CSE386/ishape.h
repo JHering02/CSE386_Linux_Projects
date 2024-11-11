@@ -225,12 +225,12 @@ struct ICylinderY : public ICylinder {
 
 struct IClosedCylinderY : public ICylinder {
 	IClosedCylinderY();
-	IClosedCylinderY(const dvec3& position, double R, double len, IDisk& top, IDisk& bottom);
+	IClosedCylinderY(const dvec3& position, double R, double len);
 	virtual void findClosestIntersection(const Ray& ray, HitRecord& hit) const;
 	// void getTexCoords(const dvec3& pt, double& u, double& v) const;
-	ICylinderY body;
 	IDisk top;
 	IDisk bottom;
+	ICylinderY body;
 };
 
 

@@ -29,11 +29,11 @@ RayTracer::RayTracer(const color& defa)
  */
 
 void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
-	const IScene& theScene, const int& N) const {
+	const IScene& theScene, int N) const {
 	const RaytracingCamera& camera = *theScene.camera;
-	const vector<VisibleIShapePtr>& objs = theScene.opaqueObjs;
-	const vector<LightSourcePtr>& lights = theScene.lights;
-	color defaultColor = frameBuffer.getClearColor();
+	// const vector<VisibleIShapePtr>& objs = theScene.opaqueObjs;
+	// const vector<LightSourcePtr>& lights = theScene.lights;
+	// color defaultColor = frameBuffer.getClearColor();
 
 	for (int y = 0; y < frameBuffer.getWindowHeight(); ++y) {
 		for (int x = 0; x < frameBuffer.getWindowWidth(); ++x) {
@@ -55,15 +55,17 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 					}
 				}
 				for (auto& ray : rays) {
-					sum += glm::clamp(traceIndividualRay(ray, theScene, camera, objs, lights, depth), 0.0, 1.0);
-					frameBuffer.showAxes(x, y, ray, 0.25);			// Displays R/x, G/y, B/z axes
+					sum += traceIndividualRay(ray, theScene, camera, depth);
 				}
 				frameBuffer.setColor(x,y, (sum / glm::pow(N,2)));
+				frameBuffer.showAxes(x, y, rays.back(), 0.25); // Displays R/x, G/y, B/z axes	
 			} else {
-				frameBuffer.setColor(x,y,glm::clamp(traceIndividualRay(singlRay, theScene, camera, objs, lights, depth), 0.0, 1.0));
-				frameBuffer.showAxes(x, y, singlRay, 0.25);			// Displays R/x, G/y, B/z axes
+				frameBuffer.setColor(x,y, traceIndividualRay(singlRay, theScene, camera, depth));
+				frameBuffer.showAxes(x, y, singlRay, 0.25);	// Displays R/x, G/y, B/z axes
 			}
-			// // consider moving this to helper method.
+			// ORIGINAL CODE COVERED IN LECTURE
+			// ========================================
+			//
 			// // firstShape.findClosestIntersection(ray, hit);
 			// OpaqueHitRecord hit;
 			// VisibleIShape::findIntersection(ray, theScene.opaqueObjs, hit);
@@ -89,6 +91,8 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
 			// } else {
 			// 	frameBuffer.setColor(x,y,black);
 			// }
+			//
+			// ========================================
 		}
 	}
 	frameBuffer.showColorBuffer();
@@ -105,34 +109,44 @@ void RayTracer::raytraceScene(FrameBuffer& frameBuffer, int depth,
  * @return	The color to be displayed as a result of this ray.
  */
 
-color RayTracer::traceIndividualRay(const Ray& ray, const IScene& theScene, const RaytracingCamera& camera, 
-const vector<VisibleIShapePtr> &objs, const vector<LightSourcePtr> &lights, int recursionLevel) const {
-	// consider moving this to helper method.
-	// firstShape.findClosestIntersection(ray, hit);
+color RayTracer::traceIndividualRay(const Ray& ray, const IScene& theScene, const RaytracingCamera& camera, int recursionLevel) const {
+	// Pre-req method calls variables
 	OpaqueHitRecord hit;
-	VisibleIShape::findIntersection(ray, objs, hit);
+	TransparentHitRecord tHit;
+	VisibleIShape::findIntersection(ray, theScene.opaqueObjs, hit);
+	TransparentIShape::findIntersection(ray, theScene.transparentObjs, tHit);
+	// Single Object Implementation (Outdated)
+	// firstShape.findClosestIntersection(ray, hit);
 	if (hit.t != FLT_MAX) {
+		// Single Object Implementation (Outdated)
 		// hit.material = firstVisibleShape.material;
 		// color C = hit.material.diffuse;
-		if (glm::dot(ray.dir, hit.normal) > 0)
-			hit.normal = -1.0 * hit.normal;
-		bool inShadow = lights[0]->pointIsInAShadow(hit.interceptPt, hit.normal, objs, camera.getFrame());
+		// bool inShadow = theScene.lights[0]->pointIsInAShadow(hit.interceptPt, hit.normal, theScene.opaqueObjs, camera.getFrame());
 		color sum = black;
-		if (hit.texture != nullptr) {
-			sum = hit.texture->getPixelUV(hit.u, hit.v);
-		} else {
-			for (auto &light : lights) {
-				bool inShadow = light->pointIsInAShadow(hit.interceptPt, hit.normal, objs, camera.getFrame());
+		if (glm::dot(ray.dir, hit.normal) > 0) hit.normal = -1.0 * hit.normal;
+		// Apply texture if necessary
+		if (hit.texture != nullptr) sum = hit.texture->getPixelUV(hit.u, hit.v);
+		else {
+			// Render opaque object using illuminate
+			for (auto &light : theScene.lights) {
+				bool inShadow = light->pointIsInAShadow(hit.interceptPt, hit.normal, theScene.opaqueObjs, camera.getFrame());
 				sum += light->illuminate(hit.interceptPt, hit.normal, hit.material, camera.getFrame(), inShadow);
 			}
 		}
-		color res = glm::clamp(sum, 0.0, 1.0);
+		// Alpha blend if there is a transparent obj in front of an opaque one
+		if (tHit.t != FLT_MAX && tHit.t < hit.t) return ((1 - tHit.alpha) * sum) + (tHit.alpha * tHit.transColor);
+		// Reflections 
 		if (recursionLevel > 0) {
-			Ray recRay(hit.interceptPt, ray.dir - (2 * glm::dot(ray.dir, hit.normal) * hit.normal));
-			return res + traceIndividualRay(recRay, theScene, camera, objs, lights, recursionLevel--);
-		} 
-		return res;
+			dvec3 newOrigin = IShape::movePointOffSurface(hit.interceptPt, hit.normal);
+			Ray recRay(newOrigin, ray.dir - (2 * glm::dot(ray.dir, hit.normal) * hit.normal));
+			return glm::clamp(sum + (traceIndividualRay(recRay, theScene, camera, recursionLevel - 1) * 0.3), 0.0, 1.0);
+		}
+		return glm::clamp(sum, 0.0, 1.0);
+	} else if (tHit.t != FLT_MAX) {
+		// Do alpha blending for the background when no opaque objects exist
+		return glm::clamp(((1 - tHit.alpha) * defaultColor) + (tHit.alpha * tHit.transColor), 0.0, 1.0);
+	} else {
+		return defaultColor;
 	}
-	return black;
 }
 

@@ -19,7 +19,7 @@
 #include "camera.h"
 #include "rasterization.h"
 
-Image im1("usflag.ppm");
+Image im1("CSE386Fall24/CSE386/usflag.ppm");
 
 int currLight = 0;
 double angle = 0.5;
@@ -61,6 +61,8 @@ IPlane* clearPlane = new IPlane(dvec3(0.0, 0.0, MINZ), dvec3(0.0, 0.0, 1.0));
 ISphere* sphere1 = new ISphere(dvec3(0.0, 0.0, 0.0), 4.0);
 IEllipsoid* ellipsoid = new IEllipsoid(dvec3(4, 0, 5), dvec3(1, 1, 2.5));
 ICylinderY* cylinderY = new ICylinderY(dvec3(8.0, 3.0, -2.0), 1.5, 3.0);
+IClosedCylinderY* cCylinderY = new IClosedCylinderY(dvec3(8.0, -1.0, 2.0), 1.0, 3.0);
+ITriangle* triangular = new ITriangle(dvec3(-10.0, 5.0, 10.0), dvec3(2.0, 10.0, -1.0), dvec3(-15.0, 5.0,-5.0));
 IDisk* disk = new IDisk(dvec3(-8,0,10), dvec3(1,0,0), 3);
 
 void buildScene() {
@@ -71,7 +73,9 @@ void buildScene() {
 	scene.addOpaqueObject(new VisibleIShape(ellipsoid, copper));
 
 	scene.addOpaqueObject(new VisibleIShape(cylinderY, gold, &im1));
+	scene.addOpaqueObject(new VisibleIShape(cCylinderY, greenPlastic));
 	scene.addOpaqueObject(new VisibleIShape(disk, redPlastic));
+	scene.addOpaqueObject(new VisibleIShape(triangular, turquoise));
 		
 	scene.addLight(lights[0]);
 	scene.addLight(lights[1]);
@@ -85,7 +89,7 @@ void render() {
 	frameBuffer.clearColorBuffer();
 
 	scene.camera = new PerspectiveCamera(cameraPos, cameraFocus, cameraUp, cameraFOV, width, height);
-	rayTrace.raytraceScene(frameBuffer, 0, scene);
+	rayTrace.raytraceScene(frameBuffer, numReflections, scene, antiAliasing);
 
 	frameBuffer.showColorBuffer();
 	int frameEndTime = glutGet(GLUT_ELAPSED_TIME); // Get end time

@@ -114,11 +114,11 @@ TransparentIShape::TransparentIShape(IShapePtr shapePtr, const color& C, double 
  */
 
 void TransparentIShape::findClosestIntersection(const Ray& ray, TransparentHitRecord& hit) const {
-	/* 386 - todo */
-	hit.t = FLT_MAX;
-	hit.interceptPt = ORIGIN3D;
-	hit.normal = Y_AXIS;
-	hit.alpha = 1.0;
+	shape->findClosestIntersection(ray,hit);
+	if (hit.t < FLT_MAX) {
+		hit.alpha = alpha;
+		hit.transColor = c;
+	}
 }
 
 /**
@@ -132,9 +132,16 @@ void TransparentIShape::findClosestIntersection(const Ray& ray, TransparentHitRe
 void TransparentIShape::findIntersection(const Ray& ray, const vector<TransparentIShapePtr>& surfaces,
 	TransparentHitRecord& theHit) {
 	/* CSE 386 - todo  */
-	theHit.t = FLT_MAX;
-	theHit.interceptPt = ORIGIN3D;
-	theHit.normal = Y_AXIS;
+	// theHit.t = FLT_MAX;
+	// theHit.interceptPt = ORIGIN3D;
+	// theHit.normal = Y_AXIS;
+	for(size_t i = 0; i < surfaces.size(); ++i) {
+		TransparentHitRecord hitFS;
+		TransparentIShape vis = *surfaces[i];
+		vis.findClosestIntersection(ray, hitFS);
+		if (hitFS.t < theHit.t)
+			theHit = hitFS;
+	}
 }
 
 /**
@@ -820,14 +827,11 @@ void ICylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
 	HitRecord hits[2];
 	int numHits = IQuadricSurface::findIntersections(ray, hits);
 	hit.t = FLT_MAX;
-	if (numHits > 0)
-	{
-		for (const HitRecord& cHit : hits) // Return the first hit iin the target area
-		{
-
-			if (cHit.interceptPt.y >= center.y - length / 2 && cHit.interceptPt.y <= center.y + length / 2)
-			{
+	if (numHits > 0) {
+		for (const HitRecord& cHit : hits) {
+			if (cHit.interceptPt.y >= center.y - length / 2 && cHit.interceptPt.y <= center.y + length / 2) {
 				hit = cHit;
+				// Return 1st hit in target area
 				return;
 			}
 		}
@@ -862,11 +866,11 @@ IClosedCylinderY::IClosedCylinderY()
 	: ICylinder(ORIGIN3D, 1.0, 1.0, QuadricParameters::cylinderYQParams(1.0)) {
 }
 
-IClosedCylinderY::IClosedCylinderY(const dvec3& position, double R, double len, IDisk& top, IDisk& bottom)
+IClosedCylinderY::IClosedCylinderY(const dvec3& position, double R, double len)
 	: ICylinder(position, R, len, QuadricParameters::cylinderYQParams(R)) {
-		this->top = IDisk(top);
-		this->bottom = IDisk(bottom);
 		this->body = ICylinderY(position, R, len);
+		this->top = IDisk(dvec3(position.x, body.center.y + (len / 2.0), position.z), dvec3(0.0, 1.0, 0.0), R);
+		this->bottom = IDisk(dvec3(position.x, body.center.y - (len / 2.0), position.z), dvec3(0.0, -1.0, 0.0), R);
 }
 
 void IClosedCylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) const {
@@ -874,7 +878,10 @@ void IClosedCylinderY::findClosestIntersection(const Ray& ray, HitRecord& hit) c
 	body.findClosestIntersection(ray, bodHit);
 	top.findClosestIntersection(ray, topHit);
 	bottom.findClosestIntersection(ray, botHit);
-
+	// No overload <operator or else this would work
+	// hit = glm::min(bodHit, glm::min(topHit, botHit));
+	bool minDisk = topHit.t < botHit.t; // Minimum using ternary operators
+	hit = bodHit.t < (minDisk ? topHit.t : botHit.t) ? bodHit : (minDisk ? topHit : botHit); 
 }
 /**
  * @fn	IEllipsoid::IEllipsoid(const dvec3 &position, const dvec3 &sz)
