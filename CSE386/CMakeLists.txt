@@ -11,10 +11,11 @@ cmake_minimum_required(VERSION 3.10)
 # set(MAIN_FILE exerciseRaytrace.cpp)
 # set(MAIN_FILE exerciseColorTests.cpp)
 # set(MAIN_FILE exercisetriangles.cpp)
-set(MAIN_FILE fullraytrace.cpp)
+# set(MAIN_FILE fullraytrace.cpp)
 # set(MAIN_FILE exercisespotlightcone.cpp)
 # set(MAIN_FILE exercisetextures.cpp)
 # set(MAIN_FILE exercisematrixoperationsGLM.cpp)
+set(MAIN_FILE exercise2Dtransformations.cpp)
 
 
 # Project name
