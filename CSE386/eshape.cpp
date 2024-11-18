@@ -45,13 +45,40 @@ EShapeData EShape::createEDisk(const Material& mat, int slices) {
  */
 
 EShapeData EShape::createECylinder(const Material& mat, int slices) {
-	/* CSE 386 - todo  */
-	EShapeData result;
-	dvec4 A(0, 0, 0, 1);
-	dvec4 B(1, 1, 1, 1);
-	dvec4 C(0, 1, 0, 1);
-	VertexData::addTriVertsAndComputeNormal(result, A, B, C, mat);
-	return result;
+	    EShapeData result;
+    double angleInc = TWO_PI / slices;
+
+    // Create the top disk
+    EShapeData topDisk = createEDisk(mat, slices);
+    for (auto& vert : topDisk) {
+        vert.pos.y = 0.5;
+        vert.worldPos.y = 0.5;
+    }
+    result.insert(result.end(), topDisk.begin(), topDisk.end());
+
+    // Create the bottom disk
+    EShapeData bottomDisk = createEDisk(mat, slices);
+    for (auto& vert : bottomDisk) {
+        vert.pos.y = -0.5;
+        vert.worldPos.y = -0.5;
+    }
+    result.insert(result.end(), bottomDisk.begin(), bottomDisk.end());
+
+    // Create the sides of the cylinder
+    for (int i = 0; i < slices; i++) {
+        double A1 = i * angleInc;
+        double A2 = A1 + angleInc;
+
+        dvec4 A(std::cos(A1), -0.5, std::sin(A1), 1.0);
+        dvec4 B(std::cos(A2), -0.5, std::sin(A2), 1.0);
+        dvec4 C(std::cos(A1), 0.5, std::sin(A1), 1.0);
+        dvec4 D(std::cos(A2), 0.5, std::sin(A2), 1.0);
+
+        VertexData::addTriVertsAndComputeNormal(result, A, B, C, mat);
+        VertexData::addTriVertsAndComputeNormal(result, C, B, D, mat);
+    }
+
+    return result;
 }
 
 /**
@@ -63,9 +90,25 @@ EShapeData EShape::createECylinder(const Material& mat, int slices) {
  */
 
 EShapeData EShape::createECone(const Material& mat, int slices) {
-	/* CSE 386 - todo  */
 	EShapeData result;
-	return result;
+    double angleInc = TWO_PI / slices;
+
+    dvec4 tip(0.0, 0.5, 0.0, 1.0);
+    dvec4 baseCenter(0.0, -0.5, 0.0, 1.0);
+
+	// Create Cone Sides
+    for (int i = 0; i < slices; i++) {
+        double A1 = i * angleInc;
+        double A2 = A1 + angleInc;
+
+        dvec4 baseA(std::cos(A1), -0.5, std::sin(A1), 1.0);
+        dvec4 baseB(std::cos(A2), -0.5, std::sin(A2), 1.0);
+
+        VertexData::addTriVertsAndComputeNormal(result, tip, baseA, baseB, mat);
+        VertexData::addTriVertsAndComputeNormal(result, baseCenter, baseB, baseA, mat);
+    }
+
+    return result;
 }
 
 /**

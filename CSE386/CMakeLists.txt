@@ -15,7 +15,9 @@ cmake_minimum_required(VERSION 3.10)
 # set(MAIN_FILE exercisespotlightcone.cpp)
 # set(MAIN_FILE exercisetextures.cpp)
 # set(MAIN_FILE exercisematrixoperationsGLM.cpp)
-set(MAIN_FILE exercise2Dtransformations.cpp)
+# set(MAIN_FILE exercise2Dtransformations.cpp)
+set(MAIN_FILE exercise3Dtransformations.cpp)
+
 
 
 # Project name
