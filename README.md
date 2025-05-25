@@ -3,8 +3,10 @@ Welcome to my repo for CSE386 at Miami University (Foundation of Graphics)
 
 
 This Repo contains:
-    * A cmake file which allows students an alternative option for building the project (Doesn't depend on Visual Studio 2019)
-    * Most of the exercises I completed that wasn't explicitly stated to be copyrighted material
+
++ A cmake file which allows students an alternative option for building the project (Doesn't depend on Visual Studio 2019)
+    
++ Most of the exercises I completed that wasn't explicitly stated to be copyrighted material
 
 
 ### Additions to the initial project
